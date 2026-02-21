@@ -1,4 +1,4 @@
-from Homework1 import find_u
+from Ex1 import find_u
 import random
 
 def asociativitate_adunare():
