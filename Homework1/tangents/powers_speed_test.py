@@ -16,10 +16,8 @@ def rand_x():
 
     return x
 
-def pow_test():
+def pow_test(x):
     start_time = time.time()
-
-    x = rand_x()
 
     print("3rd power: ", pow(x,3))
     print("5th power: ", pow(x,5))
@@ -32,10 +30,8 @@ def pow_test():
 
     print("Elapsed time: ", elapsed_time)
 
-def manual_pow_test():
+def manual_pow_test(x):
     start_time = time.time()
-
-    x = rand_x()
 
     x_2nd = x * x
     x_3rd = x_2nd * x
@@ -55,5 +51,12 @@ def manual_pow_test():
 
     print("Elapsed time: ", elapsed_time)
 
-print(pow_test())
-print(manual_pow_test())
+def run():
+
+    x = rand_x()
+
+    print(pow_test(x))
+    print(manual_pow_test(x))
+
+print(run())
+
