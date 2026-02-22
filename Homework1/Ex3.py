@@ -19,6 +19,14 @@ def normalize_x(x):
     if x > math.pi/2:
         x = x - math.pi
 
+    epsilon = 1e-15 # Definim un epsilon foarte mic
+    if abs(abs(x) - math.pi / 2) < epsilon: # Daca diferenta absoluta dintre x si pi/2 este mai mica decat acest epsilon,
+        # le consideram prea apropiate
+        if x > 0:
+            return float('inf')
+        else:
+            return float('-inf')
+
     return x
 
 def compare_polinomial_tan(x):
@@ -109,14 +117,17 @@ def run():
         while i <= 10:
             print("Iteration: ", i)
 
-            x = random.uniform(-math.pi, math.pi)
+            x = random.uniform(10*(-1)*math.pi, 10*math.pi)
 
             print("This is the number: ", x)
 
-            if x > math.pi/2 or x < math.pi/2 * (-1):
-                x = normalize_x(x)
+            x = normalize_x(x)
 
             print("This is the number normalized: ", x, "\n")
+
+            if math.isinf(x):
+                print(f"The value of {x} is a multiple of pi/2, that means the tangent is infinite.")
+                continue  # Skip this value to avoid crashing
 
             poli_tan_error, optimized_poli_tan_error, poli_tan_time = compare_polinomial_tan(x)
             frac_tan_error, frac_tan_time = compare_fraction_tan(x)
