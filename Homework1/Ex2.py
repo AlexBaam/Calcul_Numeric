@@ -21,6 +21,9 @@ def asociativitate_adunare():
 print(asociativitate_adunare())
 
 def asociativitate_inmultire():
+
+    count = 0
+
     while True:
         x = random.random()
         y = random.random()
@@ -32,6 +35,10 @@ def asociativitate_inmultire():
         right_side = x * (y * z)
 
         print(f"left_side: {left_side}\n  right_side: {right_side}\n")
+
+        count += 1
+
+        print(count)
 
         if left_side != right_side:
             return f"ex2: inmultirea nu este asociativa\n"
