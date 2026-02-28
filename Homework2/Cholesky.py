@@ -86,13 +86,32 @@ def multiply_matrix_vector(a_matrix, x_solution, n):
     print(f"\nComputed multiplication: ", something_computed)
     return something_computed
 
+def gen_random_matrix(n):
+    b_matrix = np.random.randn(n, n)
+    a_matrix = b_matrix @ b_matrix.T
+
+    b_array = np.random.randn(n)
+
+    print("Matricea B:")
+    print(b_matrix)
+    print("\nMatricea A:")
+    print(a_matrix)
+
+    return a_matrix, b_array
+
 def run():
-    n = 3
+    #a_matrix = np.array([[4, 2, 2], [2, 5, 1], [2, 1, 3]], dtype=float)
+    #b_array = np.array([8, 13, 9], dtype=float)
+
+    n = 101
     epsilon = 1e-15
-    a_matrix = np.array([[4, 2, 2], [2, 5, 1], [2, 1, 3]], dtype=float)
+    a_matrix, b_array = gen_random_matrix(n)
 
     print("\nMatricea A initiala:")
     print(a_matrix)
+
+    print("\nVector termeni liberi B:")
+    print(b_array)
 
     init_a_elements = list()
 
@@ -105,11 +124,6 @@ def run():
 
     print("\nElementele de sub diagonala principala:")
     print(init_a_elements)
-
-    b_array = np.array([8, 13, 9], dtype=float)
-
-    print("\nVector termeni liberi B:")
-    print(b_array)
 
     a_matrix, diagonal_array = cholesky(a_matrix, n, epsilon)
 
