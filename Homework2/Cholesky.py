@@ -58,7 +58,7 @@ def cholesky_solve(a_matrix, diagonal_array,n, b_array, large_matrix):
     x_unknowns = np.zeros(n)
     for i in range(n):
         direct_substitution_sum = 0
-        for j in range(n):
+        for j in range(i):
             if i >= j:
                 direct_substitution_sum += a_matrix[i, j] * z_unknowns[j]
                 if not large_matrix:
