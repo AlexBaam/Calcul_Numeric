@@ -42,4 +42,5 @@ def run():
     print("\nSolutie:")
     print("\n",x_lib)
 
+# print(run_random())
 print(run())
