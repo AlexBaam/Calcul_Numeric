@@ -21,7 +21,7 @@ def descompunere_householder_qr(A, n, b, epsilon, afisare):
     b = np.array(b, dtype=float)
 
     R = np.copy(A)
-    Q = np.eye(n, dtype=float)
+    Q = np.eye(n, dtype=float) # matricea identitate
     if afisare:
         print(f"Matricea R initiala:\n {R}\n")
         print(f"Matricea Q initiala:\n {Q}\n")
@@ -30,7 +30,7 @@ def descompunere_householder_qr(A, n, b, epsilon, afisare):
         if afisare:
             print(f"\nPasul r = {r}\n")
 
-        # suma patratelor de pe coloana r
+        # suma patratelor elementelor de pe coloana r, de la linia r in jos
         sigma = 0
         for i in range(r, n):
             sigma += R[i][r] ** 2
@@ -38,8 +38,9 @@ def descompunere_householder_qr(A, n, b, epsilon, afisare):
             if afisare:
                 print("sigma = ", sigma)
 
+        # verificare daca coloana r e aproape nula
         if sigma <= epsilon:
-            print(f"Coloana r este aproape 0. Matricea este singulara. Ne oprim.")
+            print(f"Coloana {r} este aproape 0. Matricea este singulara. Ne oprim.")
             break
 
         k = np.sqrt(sigma)
@@ -49,6 +50,7 @@ def descompunere_householder_qr(A, n, b, epsilon, afisare):
         if afisare:
             print("k = ", k)
 
+        # constanta reflectprului
         beta = sigma - k * R[r][r]
         if afisare:
             print("beta = ", beta)
@@ -61,7 +63,7 @@ def descompunere_householder_qr(A, n, b, epsilon, afisare):
         if afisare:
             print("\nVectorul u:\n", u)
 
-        # transformarea coloanelor j = r+1,...,n-1
+        # transformarea coloanelor j = r+1,...,n-1 / adica toate coloanele din dreapta coloanei r
         for j in range(r+1,n):
             suma_gamma = 0
             for i in range(r,n):
@@ -108,12 +110,15 @@ def descompunere_householder_qr(A, n, b, epsilon, afisare):
     print(f"\nMatricea R:\n {R}\n")
     return Q.T, R, b
 
+# A <- Pr A
+# Pr_0 anulez elem de sub diag din coloanaa 0
+
 def verificare_singularitate(R, n, epsilon):
     for i in range(n):
         if abs(R[i][i]) <= epsilon:
-            # print(f"Matricea A initiala nu este singulara!")
+            # print(f"Matricea A initiala este singulara!")
             return False
-    return True
+    return True # nu e singulara
 
 def rezolvare_sistem_householder_qr(R, b, n, epsilon, afisare):
     # substitutie inversa
@@ -124,7 +129,7 @@ def rezolvare_sistem_householder_qr(R, b, n, epsilon, afisare):
 
     x_householder = np.zeros(n, dtype=float)
 
-    for i in range(n-1, -1, -1):
+    for i in range(n-1, -1, -1): # pornesc de la n-1 pana la 0, pas -1
         suma = 0
         for j in range(i+1,n):
             suma += R[i][j] * x_householder[j]
@@ -215,7 +220,7 @@ def inversa_qr_householder(Q, R, n, epsilon, afisare):
     print("\nMatricea A nu este singulara si putem calcula inversa\n")
 
     for j in range(n):
-        e_j = np.zeros(n, dtype=float)
+        e_j = np.zeros(n, dtype=float) # baza canonica
         e_j[j] = 1.0
 
         b = Q.T @ e_j
@@ -223,7 +228,8 @@ def inversa_qr_householder(Q, R, n, epsilon, afisare):
         x = rezolvare_sistem_householder_qr(R, b, n, epsilon, afisare)
 
         for i in range(n):
-            A_inversa_householder[i,j] = x[i]
+            A_inversa_householder[i][j] = x[i] # in coloana j a inversei voi avea solutia sistemului Ax = e_j
+                                                # deci pentru fiecare coloana rezolv n sisteme
 
         if afisare:
             print(f"\nColoana {j + 1} din A^(-1):\n", x)
@@ -244,7 +250,7 @@ def randomizare_date(n):
     return A, s
 
 def run():
-    """
+
     n = 3
     epsilon = 10e-7
     A_init = [
@@ -253,16 +259,19 @@ def run():
         [0, 1, 2]
     ]
     s_init = [3, 2, 1]
-    """
     start_time = time.time()
-    n = 500
+    """
+    n = 10
     afisare = True
     if n > 100:
         afisare = False
-    epsilon = 1e-7
+    epsilon = 1e-6
     A_init, s_init = randomizare_date(n)
-
+    """
     # afisari date initiale
+    afisare = True
+    if n > 100:
+        afisare = False
     if afisare:
         print(f"Matricea A:\n {A_init}\n")
         print(f"Vectorul s:\n {s_init}\n")
@@ -291,7 +300,8 @@ def run():
     print("\nMetoda Numpy QR:\n")
     x_numpy = rezolvare_sistem_exclusiv_numpy_qr(A_init, b, afisare)
 
-    norma_solutii = math.sqrt(sum((x_numpy[i] - x_householder[i]) ** 2 for i in range(n)))
+    #norma_solutii = math.sqrt(sum((x_numpy[i] - x_householder[i]) ** 2 for i in range(n)))
+    norma_solutii = np.linalg.norm(x_numpy - x_householder, ord=2)
     print("\nNorma euclidiana ||x_qr - x_householder|| =", norma_solutii)
 
     #norma = np.linalg.norm(x_numpy - x_householder, ord=2)

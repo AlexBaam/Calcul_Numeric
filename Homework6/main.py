@@ -50,8 +50,11 @@ def rezolvare_schema_horner(a_i, x_barat):
         P_x = P_x * x_barat + a_i[i]
     return P_x
 
+"""
+de facut functia sa fie generala folosind cramer
 def derivata_functie(x):
     return 4*x**3 - 36*x**2 + 60*x
+"""
 
 # x_i+1 - x_i
 def calculare_h(x_i):
@@ -64,12 +67,16 @@ def construire_sistem_spline(x_i, y_i, da, db):
     h = calculare_h(x_i)
     n = len(x_i) - 1
 
-    H = np.zeros((n + 1, n + 1))
-    f = np.zeros(n + 1)
+    H = np.zeros((n + 1, n + 1)) # partea stanga a sistemului / coef
+    f = np.zeros(n + 1) # partea dreapta / termenii liberi
+
+    # practic linia 0 din H se inmulteste cu A,
+    # deci fiecare elemenet din linia 0 din H se inmulteste cu vectorul A si se egaleaza cu vectorul f
+    # construiesc matricea H si vectorul f
 
     H[0][0] = 2 * h[0]
     H[0][1] = h[0]
-    f[0] = 6 * ((y_i[1] - y_i[0]) / h[0])
+    f[0] = 6 * ((y_i[1] - y_i[0]) / h[0] - da)
 
     for i in range(1, n):
         H[i][i - 1] = h[i - 1]
@@ -85,6 +92,10 @@ def construire_sistem_spline(x_i, y_i, da, db):
 
 def rezolvare_sistem_spline(x_i, y_i, da, db):
     H, f = construire_sistem_spline(x_i, y_i, da, db)
+    print("\nMatricea H:\n", H)
+    print("\nMatricea f:\n", f)
+
+    # gaseste valorile A care fac ecuatia H @ A_i = f adevarat
     A_i = np.linalg.solve(H, f)
     return A_i
 
@@ -100,11 +111,13 @@ def calculare_c(x_i, y_i, A_i, h_i, i):
     c_i = prima_fractie - a_doua_fractie
     return c_i
 
+# verific ca un punct se afla intr un anumit interval
 def verificare_interval(punct_interval, start_interval, end_interval):
     if punct_interval < start_interval or punct_interval > end_interval:
         return False
     return True
 
+# construiesc functia spline
 def rezolvare_spline(x_i, y_i, A_i, x_barat):
     h_i = calculare_h(x_i)
 
@@ -117,17 +130,6 @@ def rezolvare_spline(x_i, y_i, A_i, x_barat):
 
         S_x = prima_fractie + a_doua_fractie + b_i * x_barat + c_i
         return S_x
-
-def citire_date_din_fisier(nume_fisier):
-    with open(nume_fisier, "r") as f:
-        x_0 = int(f.readline().strip())
-        x_n = int(f.readline().strip())
-        n = int(f.readline().strip())
-        x_barat = float(f.readline().strip())
-        da = float(f.readline().strip())
-        db = float(f.readline().strip())
-
-    return x_0, x_n, n, x_barat, da, db
 
 def run():
     # date de intrare de la tastatura
@@ -207,9 +209,11 @@ def run():
     x_valori = np.linspace(x_0, x_n, 500)
     Pm_valori = [rezolvare_schema_horner(a_i, x) for x in x_valori]
 
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(10, 6)) # latime 10, inaltime 6
+    # pe Ox pun x_valori
     plt.plot(x_valori, generare_functie(x_valori), label="f(x) - Functia originala", color='blue', linestyle='dashed')
     plt.plot(x_valori, Pm_valori, label=f"P{m}(x) - Aproximatia polinomiala", color='red')
+    # desenez punctele de interpolare
     plt.scatter(x_i, y_i, color='black', label="Punctele de interpolare")
     plt.title("Interpolare polinomiala cu metoda celor mai mici patrate")
     plt.legend()
