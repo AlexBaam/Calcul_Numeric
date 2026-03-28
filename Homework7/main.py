@@ -67,6 +67,118 @@ def horner_all(pol, deriv_pol, second_deriv_pol, x):
 
     return pol_x, pol_deriv_x, pol_double_deriv_x
 
+def newton_met(pol, deriv_pol, x0, eps, kmax):
+    x = x0
+    k = 0
+
+    while k < kmax:
+        pol_x = horner_pol(pol, x)
+        pol_deriv_x = horner_pol(deriv_pol, x)
+
+        if abs(pol_deriv_x) < eps:
+            return x, k, False
+
+        # Impartirea din formula lui Newton ce trebuie scazuta din X
+        impart = pol_x / pol_deriv_x
+
+        # DACA REZULTATUL IMPARTIRII E FOARTE MARE INSEAMNA CA AM AVUT UN SALT URIAS CEEA CE INSEAMNA DIVERGENTA
+        if abs(impart) > 1e8:
+            return x, k, False
+
+        x = x - impart # Actualizam aproximarea solutiei
+        k = k + 1
+
+        if abs(impart) < eps:
+            return x, k, True
+
+    return x, k, False
+
+def oliver_met(pol, deriv_pol, second_deriv_pol, x0, eps, kmax):
+    x = x0
+    k = 0
+    while k < kmax:
+        pol_x, pol_deriv_x, pol_double_deriv_x = horner_all(pol, deriv_pol, second_deriv_pol, x)
+
+        if abs(pol_deriv_x) < eps:
+            return x, k, False
+
+        ck = compute_ck(pol_x, pol_deriv_x, pol_double_deriv_x)
+
+        impart = pol_x / pol_deriv_x + 0.5 * ck
+
+        if abs(impart) > 1e8:
+            return x, k, False
+
+        x= x - impart
+        k = k + 1
+
+        if abs(impart) < eps:
+            return x, k, True
+
+    return x, k, False
+
+def compute_ck(pol_x, pol_deriv_x, pol_double_deriv_x):
+    """
+    Calculam ck din formula lui Oliver
+    """
+
+    sqrd_pol = pol_x**2
+    trpld_deriv = pol_deriv_x**3
+
+    return sqrd_pol * pol_double_deriv_x / trpld_deriv
+
+def generate_start_points(points_nr, R):
+    start_points = []
+
+    if points_nr <= 0:
+        return start_points
+
+    step = R * 3 / points_nr
+
+    current_step = -1 * R
+
+    for i in range(points_nr):
+
+        if current_step > R:
+            break
+
+        start_points.append(current_step)
+        current_step = current_step + step
+
+    return start_points
+
+def compare_steps(newton_steps, oliver_steps):
+    if newton_steps < oliver_steps:
+        return "Newton"
+    elif newton_steps > oliver_steps:
+        return "Oliver"
+    else:
+        return "Equal"
+
+def check_if_different(new_root, root_list, eps):
+    for root in root_list:
+        if abs(new_root - root) < eps:
+            return False
+
+    return True
+
+def different_new_ol(newton_root, olver_root, eps):
+    if abs(newton_root - olver_root) < eps:
+        return False
+    else:
+        return True
+
+def add_root_to_list(new_root, root_list, eps):
+    if check_if_different(new_root, root_list, eps):
+        root_list.append(new_root)
+
+def write_in_file(filename, roots):
+    with open(filename, "w") as f:
+        for root in roots:
+            f.write(f"{root}\n")
+
+        f.close()
+
 def run():
     coef = [1.0, -6.0, 11.0, -6.0]
 
@@ -76,7 +188,7 @@ def run():
 
     print(f"Intervalul in care se gasesc radacinile functiei este: [-{R},{R}]")
 
-    print("Coeficientii polinomului sunt: ", coef)
+    print(f"\nCoeficientii polinomului sunt: {coef}")
 
     deriv = coef_deriv(coef)
     second_deriv = coef_deriv(deriv)
@@ -87,9 +199,43 @@ def run():
     x = 1
     pol_x, pol_deriv_x, pol_double_deriv_x = horner_all(coef, deriv, second_deriv, x)
 
-    print(f"Pentru x = {x} avem urmatoarele valori ptr polinom: ")
+    print(f"\nPentru x = {x} avem urmatoarele valori ptr polinom: ")
     print(f"P({x}) = {pol_x}")
     print(f"P'({x}) = {pol_deriv_x}")
     print(f"P''({x}) = {pol_double_deriv_x}")
 
+    x0 = generate_start_points(300, R)
+    max_steps = 1000
+
+    print(f"\nVom itera prin urmatoarele puncte x0: {x0}")
+    print(f"Numarul de iteratii ce il realizam este urmatorul: {len(x0)}")
+
+    root_list = []
+
+    for value in x0:
+        root_newton, steps_newton, did_newton_converge = newton_met(coef, deriv, value, eps, max_steps)
+
+        if did_newton_converge:
+            print(f"\nMetoda lui Newton a convers la solutia {root_newton} in {steps_newton} pasi pentru x0 = {value}")
+        else:
+            print(f"\nMetoda lui Newton a divers dupa {steps_newton} pasi pentru x0 = {value}")
+
+
+        root_oliver, steps_oliver, did_converge_oliver = oliver_met(coef, deriv, second_deriv, value, eps, max_steps)
+
+        if did_converge_oliver:
+            print(f"Metoda lui Oliver a convergent la solutia {root_oliver} in {steps_oliver} pasi pentru x0 = {value}")
+        else:
+            print(f"Metoda lui Oliver a divergent dupa {steps_oliver} pasi pentru x0 = {value}")
+
+        if did_converge_oliver and did_newton_converge:
+            print(f"Metoda ce a convers mai repede este: {compare_steps(steps_newton, steps_oliver)}")
+
+            if different_new_ol(root_newton, root_oliver, eps):
+                add_root_to_list(root_newton, root_list, eps)
+                add_root_to_list(root_oliver, root_list, eps)
+            else:
+                add_root_to_list(root_newton, root_list, eps)
+
+    write_in_file("roots.txt", root_list)
 run()
