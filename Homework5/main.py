@@ -1,7 +1,6 @@
 import random
 import numpy as np
 
-
 def generare_matrice_random(p, n):
     A = []
 
@@ -168,7 +167,7 @@ def construire_matrice_S_I(n, p, S, rang_matrice_A):
     return S_I
 
 def run():
-    n = 4
+    n = 3
     print("n =", n)
     p = 4
     print("p =", p)
@@ -179,10 +178,10 @@ def run():
     print("\nEpsilon =", epsilon)
 
     A = np.array([
-        [1, 2, 3, 4],
-        [2, 3, 4, 5],
-        [3, 4, 5, 6],
-        [4, 5, 6, 7],
+        [1, 1, 1],
+        [1, 5, 5],
+        [1, 5, 14],
+        [1, 3, 4]
     ], dtype=float)
     print("\nMatricea A:\n", A)
 
@@ -222,7 +221,7 @@ def run():
 
     else:
         if p > n:
-            A = generare_matrice_random(p, n)
+            #A = generare_matrice_random(p, n)
             print("\nMatricea A:\n", A)
 
             # valorile singulare ale matricei A
