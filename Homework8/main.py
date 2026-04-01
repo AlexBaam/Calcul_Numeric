@@ -96,8 +96,16 @@ def gradient_aproximativ_functie_F(Functia_F, x, h): # h e pasul
 
     return gradient
 
-def metoda_gradient_descendent(functia_F, gradient_functie_F, n=2, h=1e-6, rata_invatare=1e-3, foloseste_bkt_line_search=False, epsilon=1e-6, kmax=30000, beta=0.8, foloseste_gradient_aproximativ=False):
+def metoda_gradient_descendent(functia_F, gradient_functie_F, n=2, h=1e-6, rata_invatare=1e-3, foloseste_bkt_line_search=False, epsilon=1e-6, kmax=30000, beta=0.8, foloseste_gradient_aproximativ=False): # x0=None
     x = np.random.uniform(-1, 1, n) # se aleg random elemnetele vectorului initial x
+
+    """
+    if x0 is None:
+        x = np.random.uniform(-1, 1, n)
+    else:
+        x = np.array(x0, dtype=float)
+    """
+
     k = 0
 
     while True:
@@ -143,9 +151,15 @@ def comparare_gradienti(
     kmax=30000,
     beta=0.8
 ):
-    print("-" * 70)
+    print("-" * 100)
     print(f"Comparatie pentru {nume_functie}")
-    print("-" * 70)
+    print("-" * 100)
+
+    """
+    # acelasi punct initial pentru ambele metode
+    x0 = np.random.uniform(-1, 1, n)
+    print(f"Punct initial comun: {x0}")
+    """
 
     # rulare cu gradient analitic
     punct_analitic, iteratii_analitic = metoda_gradient_descendent(
@@ -158,7 +172,8 @@ def comparare_gradienti(
         epsilon=epsilon,
         kmax=kmax,
         beta=beta,
-        foloseste_gradient_aproximativ=False
+        foloseste_gradient_aproximativ=False,
+        #x0=x0
     )
 
     # rulare cu gradient aproximativ
@@ -172,7 +187,8 @@ def comparare_gradienti(
         epsilon=epsilon,
         kmax=kmax,
         beta=beta,
-        foloseste_gradient_aproximativ=True
+        foloseste_gradient_aproximativ=True,
+        #x0=x0
     )
 
     print("Gradient analitic:")
@@ -224,39 +240,28 @@ def run():
     ]
 
     cazuri_testare = [
-        ("Gradient analitic si rata de invatare constanta", False, False),
-        ("Gradient aproximativ si rata de invatare constanta", False, True),
-        ("Gradient analitic si rata de invatare updatata cu backtracking line search", True, False),
-        ("Gradient aproximativ si rata de invatare updatata cu backtracking line search", True, True)
+        ("Rata de invatare constanta", False),
+        ("Rata de invatare updatata cu backtracking line search", True)
     ]
 
-    for nume_caz, foloseste_bkt_line_search, foloseste_gradient_aproximativ in cazuri_testare:
+    for nume_caz, foloseste_bkt_line_search in cazuri_testare:
         print("\n")
         print(nume_caz)
         print("\n")
 
         for functie, gradient_functie, nume_functie in functii:
-            punct_minim, numar_iteratii = metoda_gradient_descendent(
+            comparare_gradienti(
                 functie,
                 gradient_functie,
+                nume_functie,
                 n=2,
                 h=1e-6,
                 rata_invatare=1e-3,
                 foloseste_bkt_line_search=foloseste_bkt_line_search,
-                epsilon=1e-6,
+                epsilon=1.1e-5,
                 kmax=30000,
-                beta=0.8,
-                foloseste_gradient_aproximativ=foloseste_gradient_aproximativ
+                beta=0.8
             )
-
-            print(f"{nume_functie}:")
-            print(f"   Punct minim gasit: {punct_minim}")
-            print(f"   Numar iteratii: {numar_iteratii}")
-
-            if punct_minim is not None:
-                print(f"   Valoarea functiei in punctul gasit: {functie(punct_minim)}")
-
-            print()
 
         print("\n")
 
